@@ -54,6 +54,7 @@ public class Seguranca extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(servico).passwordEncoder(new BCryptPasswordEncoder());
     }
 
+    // ✅ AQUI está o bean que faltava
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {

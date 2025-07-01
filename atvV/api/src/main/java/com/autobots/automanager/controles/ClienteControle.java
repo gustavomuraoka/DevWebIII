@@ -12,39 +12,39 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
-import com.autobots.automanager.entidades.Usuario;
-import com.autobots.automanager.repositorios.UsuarioRepositorio;
+import com.autobots.automanager.entidades.Cliente;
+import com.autobots.automanager.repositorios.ClienteRepositorio;
 
 @RestController
-@RequestMapping("/usuarios")
-public class UsuarioControle {
+@RequestMapping("/clientes")
+public class ClienteControle {
 
     @Autowired
-    private UsuarioRepositorio repositorio;
+    private ClienteRepositorio repositorio;
 
     // CREATE
     @PreAuthorize("hasAnyRole('ADMIN','GERENTE','VENDEDOR')")
     @PostMapping("/cadastrar")
-    public ResponseEntity<?> cadastrarUsuario(@RequestBody Usuario usuario) {
-        repositorio.save(usuario);
+    public ResponseEntity<?> cadastrarCliente(@RequestBody Cliente cliente) {
+        repositorio.save(cliente);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     // READ ALL
     @PreAuthorize("hasAnyRole('ADMIN','GERENTE','VENDEDOR')")
     @GetMapping("/listar")
-    public ResponseEntity<List<Usuario>> obterUsuarios() {
-        List<Usuario> usuarios = repositorio.findAll();
-        return new ResponseEntity<>(usuarios, HttpStatus.OK);
+    public ResponseEntity<List<Cliente>> obterClientes() {
+        List<Cliente> clientes = repositorio.findAll();
+        return new ResponseEntity<>(clientes, HttpStatus.OK);
     }
 
     // READ BY ID
     @PreAuthorize("hasAnyRole('ADMIN','GERENTE','VENDEDOR')")
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obterUsuario(@PathVariable Long id) {
-        Optional<Usuario> usuario = repositorio.findById(id);
-        if (usuario.isPresent()) {
-            return new ResponseEntity<>(usuario.get(), HttpStatus.OK);
+    public ResponseEntity<Cliente> obterCliente(@PathVariable Long id) {
+        Optional<Cliente> cliente = repositorio.findById(id);
+        if (cliente.isPresent()) {
+            return new ResponseEntity<>(cliente.get(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -53,24 +53,24 @@ public class UsuarioControle {
     // UPDATE
     @PreAuthorize("hasAnyRole('ADMIN','GERENTE')")
     @PutMapping("/atualizar")
-    public ResponseEntity<?> atualizarUsuario(@RequestBody Usuario usuario) {
-        if (usuario.getId() != null && repositorio.existsById(usuario.getId())) {
-            repositorio.save(usuario);
+    public ResponseEntity<?> atualizarCliente(@RequestBody Cliente cliente) {
+        if (cliente.getId() != null && repositorio.existsById(cliente.getId())) {
+            repositorio.save(cliente);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("Usuário não encontrado para atualização", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Cliente não encontrado para atualização", HttpStatus.NOT_FOUND);
         }
     }
 
-    // DELETE
     @PreAuthorize("hasAnyRole('ADMIN','GERENTE','VENDEDOR')")
     @DeleteMapping("/excluir")
-    public ResponseEntity<?> excluirUsuario(@RequestBody Usuario usuario, Authentication authentication) {
-        if (usuario.getId() == null || !repositorio.existsById(usuario.getId())) {
-            return new ResponseEntity<>("Usuário não encontrado para exclusão", HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> excluirCliente(@RequestBody Cliente cliente, Authentication authentication) {
+        if (cliente.getId() == null || !repositorio.existsById(cliente.getId())) {
+            return new ResponseEntity<>("Cliente não encontrado para exclusão", HttpStatus.NOT_FOUND);
         }
 
-        Usuario alvo = repositorio.findById(usuario.getId()).get();
+        Cliente alvo = repositorio.findById(cliente.getId()).get();
+        String usuarioLogado = authentication.getName();
         List<String> papeis = authentication.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
@@ -103,9 +103,10 @@ public class UsuarioControle {
         return new ResponseEntity<>("Você não tem permissão para excluir", HttpStatus.FORBIDDEN);
     }
 
-    private boolean contemPerfil(Usuario usuario, String perfil) {
-        return usuario.getPerfis().stream()
+    private boolean contemPerfil(Cliente cliente, String perfil) {
+        return cliente.getPerfis().stream()
             .map(Enum::name)
             .anyMatch(p -> ("ROLE_" + p).equals(perfil));
     }
+
 }
